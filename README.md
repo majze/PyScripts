@@ -1,5 +1,9 @@
 # PyScripts
-Useful python scripts for everyday tasks
+Useful python scripts for everyday monotonous and repetitive tasks. Why do something more than three times when you can write a script to do it for you?
+
+![Randall Munroe is a beautiful human](https://imgs.xkcd.com/comics/automation.png)
+<br>
+###### _[Randall Munroe is a beautiful human](https://xkcd.com/)_
 
 ## clearSubdirectoriesContents.py
 For the specified directory, the script goes into each child subdirectory and delete the contents.
