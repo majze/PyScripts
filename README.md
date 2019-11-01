@@ -31,5 +31,39 @@ py .\clearSubdirectoriesContents.py /home/username/Documents skip del
 **Q:** Why would you delete directories after clearing their contents? Why not delete the directories right away?<br>
 **A:** You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
 
+## moveFilesUpOneLevel.py
+Move all contents of subdirectories up to their parent directory. For example: <br>
+
+#### Starting file structure
+![moveUp1] &nbsp; ![moveUp2]
+
+#### Final file structure
+![moveUp3]
+
+#### IMPORTANT!!!
+This script assumes parent folder ~/someDir/ ONLY contains subdirectories. After moving all files, ~/someDir/ only includes this script and the sub directories if desired. <br> <br>
+If using optionalArg2, you MUST use optionalArg1 first. Working on modularizing this for next version. <br> <br>
+Optional Arguments must be entered in correct order as listed below: <br>
+1. This script can be run locally in the parent folder with no arguments, OR:
+2. optionalArg1=parentPath >> path: points the script towards the parent path instead of running locally <br>
+3. optionalArg2=removeEmpties >> Boolean: { {True,true,1}, {False,false,0} } for removeEmpties logic <br>
+
+Examples:<br>
+```
+py .\moveFilesUpOneLevel.py
+```
+```
+py .\moveFilesUpOneLevel.py C:\Users\admin\Documents\someDir 
+```
+```
+py .\moveFilesUpOneLevel.py C:\Users\admin\Documents\someDir False
+```
+
 ## fileSizer.py
 Needs updating. Not native OS friendly.
+ 
+
+
+[moveUp1]: https://i.imgur.com/42CyxuF.png "moveUp Parent folder"
+[moveUp2]: https://i.imgur.com/Q2cF3NF.png "moveUp Child folder"
+[moveUp3]: https://i.imgur.com/aU9QT5e.png "moveUp Parent Final State"
