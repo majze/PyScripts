@@ -28,8 +28,8 @@ py .\clearSubdirectoriesContents.py C:\Users\admin\Pictures\gallery del
 py .\clearSubdirectoriesContents.py /home/username/Documents skip del
 ```
 
-Q: Why would you delete directories after clearing their contents? Why not delete the directories right away?<br>
-A: You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
+**Q:** Why would you delete directories after clearing their contents? Why not delete the directories right away?<br>
+**A:** You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
 
 ## fileSizer.py
 Needs updating. Not native OS friendly.
