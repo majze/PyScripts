@@ -32,31 +32,36 @@ py .\clearSubdirectoriesContents.py /home/username/Documents skip del
 **A:** You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
 
 ## moveFilesUpOneLevel.py
-Move all contents of subdirectories up to their parent directory. For example: <br>
+This script moves all contents of subdirectories up to their parent directory. <br>
+For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , and all of the contents of the sub directories brought up to ~/someDir/ <br>
 
 #### Starting file structure
 ![moveUp1] &nbsp; ![moveUp2]
 
 #### Final file structure
-![moveUp3]
+![moveUp3] <br>
+It does not matter what the files or folders are named, as long as they do not include nonstandard characters.
 
-#### IMPORTANT!!!
-This script assumes parent folder ~/someDir/ ONLY contains subdirectories. After moving all files, ~/someDir/ only includes this script and the sub directories if desired. <br> <br>
-If using optionalArg2, you MUST use optionalArg1 first. Working on modularizing this for next version. <br> <br>
-Optional Arguments must be entered in correct order as listed below: <br>
-1. This script can be run locally in the parent folder with no arguments, OR:
-2. optionalArg1=parentPath >> path: points the script towards the parent path instead of running locally <br>
-3. optionalArg2=removeEmpties >> Boolean: { {True,true,1}, {False,false,0} } for removeEmpties logic <br>
+### Run Instructions
+Start this script in the top level directory, either by using the '--path' argument or placing the script file there. <br> <br>
+Optional arguments: <br>
+&nbsp;&nbsp;--path *full_path* <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *full_path* with FULL path to top level directory of ~/someDir <br>
+&nbsp;&nbsp;--verbose <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - No additional input required <br>
+&nbsp;&nbsp;--rm <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - No additional input required <br> <br>
+See function argv_init() for more information on arguments
 
 Examples:<br>
 ```
 py .\moveFilesUpOneLevel.py
 ```
 ```
-py .\moveFilesUpOneLevel.py C:\Users\admin\Documents\someDir 
+py .\moveFilesUpOneLevel.py --path 'C:\Users\admin\Documents\someDir' 
 ```
 ```
-py .\moveFilesUpOneLevel.py C:\Users\admin\Documents\someDir False
+py .\moveFilesUpOneLevel.py --path 'C:\Users\admin\Documents\someDir' --verboose --rm
 ```
 
 ## fileSizer.py
