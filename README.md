@@ -32,8 +32,9 @@ py .\clearSubdirectoriesContents.py /home/username/Documents skip del
 **A:** You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
 
 ## moveFilesUpOneLevel.py
-This script moves all contents of subdirectories up to their parent directory. <br>
+This script moves all contents of subdirectories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
 For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , and all of the contents of the sub directories brought up to ~/someDir/ <br>
+
 
 #### Starting file structure
 ![moveUp1] &nbsp; ![moveUp2]
@@ -48,9 +49,9 @@ Optional arguments: <br>
 &nbsp;&nbsp;--path *full_path* <br>
 &nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *full_path* with FULL path to top level directory of ~/someDir <br>
 &nbsp;&nbsp;--verbose <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - No additional input required <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Logs every read/write operation to the terminal. No additional input required <br>
 &nbsp;&nbsp;--rm <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - No additional input required <br> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Removes empty subdirectories after moving files up. No additional input required <br> <br>
 See function argv_init() for more information on arguments
 
 Examples:<br>
