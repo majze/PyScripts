@@ -32,9 +32,9 @@ py .\clearSubdirectoriesContents.py /home/username/Documents skip del
 **A:** You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
 
 ## moveFilesUpOneLevel.py
-This script moves all contents of subdirectories up to their parent directory. <br>
+This script moves all contents of subdirectories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
 For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , and all of the contents of the sub directories brought up to ~/someDir/ <br>
-This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name.
+
 
 #### Starting file structure
 ![moveUp1] &nbsp; ![moveUp2]
