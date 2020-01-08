@@ -1,4 +1,4 @@
-""" Author: MajZe (D. Spreder) | Language: Python 3.7.4 | Last Edited: Jan 6, 2020
+""" Author: MajZe (D. Spreder) | Language: Python 3.7.4 | Last Edited: Jan 8, 2020
 # This script moves all contents of subdirectories up to their parent directory.
   For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN ,
   and all of the contents of the sub directories brought up to ~/someDir/
