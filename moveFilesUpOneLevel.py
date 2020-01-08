@@ -54,22 +54,22 @@ def main():
     for dir in dirList:
         # Current working directory
         cwd = join(origin, dir)
-        if (args.verbose):
+        if args.verbose:
             print(f"Parsing {dir}/ ", '='*12)
         
         # Get list of and parse through files in current subdirectory
         fileList = os.listdir(cwd)
         for file in fileList:
-            if (args.verbose):
+            if args.verbose:
                 print(f"moving {file}")
             shutil.move(join(cwd, file), origin)
 
-    # Remove empty directories when done, if removeEmpties == True
-    if (args.rm):
+    # Remove empty directories when done, if using --rm argument
+    if args.rm:
         for dir in dirList:
-            if (args.verbose):
+            if args.verbose:
                 print(f"Removing {dir}")
-            os.rmdir(os.path.join(origin, dir))
+            os.rmdir(join(origin, dir))
         print("** Removed empty directories **\n")
                 
     print("** Operation complete **\n")
