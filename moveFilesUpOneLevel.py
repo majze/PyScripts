@@ -17,7 +17,6 @@ import argparse
 import os
 import shutil
 import sys
-init()
 
 def main():
     # argument parser
@@ -47,14 +46,14 @@ def main():
 
     # Get list of all subdirectories and log paths
     dirList = [dir for dir in os.listdir(origin) if os.path.isdir(join(origin, dir)) and dir != __file__[2:]]
-    print(f"Directories: {dirList}\n")
+    print(f"Directories: {dirList}")
     
     # Parse through subdirectories
     for dir in dirList:
         # Current working directory
         cwd = join(origin, dir)
         if args.verbose:
-            print(f"Parsing {dir}/ ", '='*12)
+            print("\n", '='*6, f"Parsing {dir}/ ", '='*12)
         
         # Get list of and parse through files in current subdirectory
         fileList = os.listdir(cwd)
@@ -65,11 +64,12 @@ def main():
 
     # Remove empty directories when done, if using --rm argument
     if args.rm:
+        print("\n", '='*6, "Removing empties", '='*12)
         for dir in dirList:
             if args.verbose:
                 print(f"Removing {dir}")
             os.rmdir(join(origin, dir))
-        print("** Removed empty directories **\n")
+        print("\n** Removed empty directories **")
                 
     print("** Operation complete **\n")
 
