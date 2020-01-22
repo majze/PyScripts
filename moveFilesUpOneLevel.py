@@ -17,7 +17,6 @@ import argparse
 import os
 import shutil
 import sys
-from colorama import init, Fore
 init()
 
 def main():
@@ -33,15 +32,15 @@ def main():
         origin = os.path.dirname(os.path.realpath(__file__))
         print("\nNo path specified - Default execution path: ", origin)
         # Confirm no path argument if using script file locally
-        askConfirm = input(f"{Fore.CYAN}Confirm (y/n): {Fore.RESET}")
+        askConfirm = input("Confirm (y/n): ")
         if askConfirm == "y" or askConfirm == "Y":
             print("Path confirmed, executing...\n")
         elif askConfirm == "n" or askConfirm == "N":
-            print(f"{Fore.RED}** Job cancelled by user **{Fore.RESET}\n")
+            print("** Job cancelled by user **\n")
             sys.exit()
         else:
-            print(f"{Fore.YELLOW}Interpreting vague answer as no, stopping script!{Fore.RESET}\n")
-            raise Exception(f"{Fore.RED}Unexpected user input confirming execution path{Fore.RESET}\n")
+            print("Interpreting vague answer as no, stopping script!\n")
+            raise Exception("Unexpected user input confirming execution path\n")
     
     # Log path and start of script
     print(f"\nStarting Job in: {origin}")
