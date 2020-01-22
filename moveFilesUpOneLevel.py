@@ -1,4 +1,4 @@
-""" Author: MajZe (D. Spreder) | Language: Python 3.7.4 | Last Edited: Jan 6, 2020
+""" Author: MajZe (D. Spreder) | Language: Python 3.7.4 | Last Edited: Jan 8, 2020
 # This script moves all contents of subdirectories up to their parent directory.
   For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN ,
   and all of the contents of the sub directories brought up to ~/someDir/
@@ -17,8 +17,6 @@ import argparse
 import os
 import shutil
 import sys
-from colorama import init, Fore
-init()
 
 def main():
     # argument parser
@@ -33,29 +31,29 @@ def main():
         origin = os.path.dirname(os.path.realpath(__file__))
         print("\nNo path specified - Default execution path: ", origin)
         # Confirm no path argument if using script file locally
-        askConfirm = input(f"{Fore.CYAN}Confirm (y/n): {Fore.RESET}")
+        askConfirm = input("Confirm (y/n): ")
         if askConfirm == "y" or askConfirm == "Y":
             print("Path confirmed, executing...\n")
         elif askConfirm == "n" or askConfirm == "N":
-            print(f"{Fore.RED}** Job cancelled by user **{Fore.RESET}\n")
+            print("** Job cancelled by user **\n")
             sys.exit()
         else:
-            print(f"{Fore.YELLOW}Interpreting vague answer as no, stopping script!{Fore.RESET}\n")
-            raise Exception(f"{Fore.RED}Unexpected user input confirming execution path{Fore.RESET}\n")
+            print("Interpreting vague answer as no, stopping script!\n")
+            raise Exception("Unexpected user input confirming execution path\n")
     
     # Log path and start of script
     print(f"\nStarting Job in: {origin}")
 
     # Get list of all subdirectories and log paths
     dirList = [dir for dir in os.listdir(origin) if os.path.isdir(join(origin, dir)) and dir != __file__[2:]]
-    print(f"Directories: {dirList}\n")
+    print(f"Directories: {dirList}")
     
     # Parse through subdirectories
     for dir in dirList:
         # Current working directory
         cwd = join(origin, dir)
         if args.verbose:
-            print(f"Parsing {dir}/ ", '='*12)
+            print("\n", '='*6, f"Parsing {dir}/ ", '='*12)
         
         # Get list of and parse through files in current subdirectory
         fileList = os.listdir(cwd)
@@ -66,11 +64,12 @@ def main():
 
     # Remove empty directories when done, if using --rm argument
     if args.rm:
+        print("\n", '='*6, "Removing empties", '='*12)
         for dir in dirList:
             if args.verbose:
                 print(f"Removing {dir}")
             os.rmdir(join(origin, dir))
-        print("** Removed empty directories **\n")
+        print("\n** Removed empty directories **")
                 
     print("** Operation complete **\n")
 
