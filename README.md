@@ -1,35 +1,46 @@
 # PyScripts
-Useful python scripts for everyday monotonous and repetitive tasks. Why do something more than three times when you can write a script to do it for you?
+Useful python scripts for everyday monotonous and repetitive tasks.<br>
+Why do something more than three times when you can write a script to do it for you?
 
 ![Randall Munroe is a beautiful human](https://imgs.xkcd.com/comics/automation.png)
 <br>
 ###### _[Randall Munroe is a beautiful human](https://xkcd.com/)_
 
 ## clearSubdirectoriesContents.py
-For the specified directory, the script goes into each child subdirectory and delete the contents.
+For the specified directory, the script goes into each child subdirectory and delete the contents.<br>
 
-Run intructions:
+For example, every folder in ~/parentDir/ will be parsed and have its content deleted, unless specified using the ignoreList passed into the argument '--ignore'. All the files and folders inside each subdirectory ~/parentDir/folder1 , ... , ~/parentDir/folderN etc will be removed unless an exception is made.<br>
+
+### Run Instructions
 Navigate to the script location in your favorite terminal and type:
 ```
-py .\clearSubdirectoriesContents.py arg1 arg2 arg3
+py .\clearSubdirectoriesContents.py
 ```
+Runinng without any arguments will run the script LOCALLY, and will prompt the user twice: Once to confirm the script's run location, and again to confirm the subdirectories to be cleared. It does not matter what the files or folders are named, as long as they do not include nonstandard characters.<br>
 
-arg1 is mandatory. Enter the custom\directory\path to your top-level folder which contains the subdirectories to be cleared.<br>
-arg2 and arg3 are optional and can be entered in any order:
-
-&nbsp; &nbsp; &nbsp; optionalArg2 = del  >> deletes empty directories after clearing their contents<br>
-&nbsp; &nbsp; &nbsp; optionalArg3 = skip >> skips the safety check in function verify()
+Start this script in the top level directory, either by using the '--path' argument or placing the script file there. <br> <br>
+Optional arguments: <br>
+&nbsp;&nbsp;--path *full_path* <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *full_path* with FULL path to top level directory of ~/someDir <br>
+&nbsp;&nbsp;--ignore *ignore_list*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *ignore_list* with comma separated values. Include quotes if using spaces. <br>
+&nbsp;&nbsp;--verbose <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Logs every I/O operation to the terminal. No additional input required <br>
+&nbsp;&nbsp;--rm <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Removes empty subdirectories after deleting their files, unless specified by the --ignore argument.<br>
+&nbsp;&nbsp;--force <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Runs script with no user input, assuming the best intentions. Careful! <br><br>
 
 Examples:<br>
 ```
-py .\clearSubdirectoriesContents.py C:\Users\admin\Pictures\gallery del
+py .\clearSubdirectoriesContents.py --ignore .git,node_modules,src --verbose
 ```
 ```
-py .\clearSubdirectoriesContents.py /home/username/Documents skip del
+py .\clearSubdirectoriesContents.py --path /home/username/Documents --ignore 'plex, My Games' --rm --force
 ```
 
-**Q:** Why would you delete directories after clearing their contents? Why not delete the directories right away?<br>
-**A:** You can. But I make modifications to this script all the time to leave certain files or directory names alone, and having an exception list in the removeEmpties() function can help.
+**Q:** Why delete empty directories *after* removing their content? Why not delete the directories right away? <br>
+**A:** This script was made with exceptions in mind, so some files and folders can be left untouched. There's not really a point to running this script with --rm and without --ignore. Just delete the directories manually in that case.
 
 ## moveFilesUpOneLevel.py
 This script moves all contents of subdirectories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
