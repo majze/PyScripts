@@ -57,7 +57,7 @@ function runZipProcess($compressionLevel) {
 }
 
 # Main Loop - Goes over 5 iterations by default for a more accurate average.
-For ([int]$i = 0; $i -lt 1; $i++) {
+For ([int]$i = 0; $i -lt 5; $i++) {
     Write-Host "Running zip pass #$($i + 1)"
     cleanupZips -wait
     runZipProcess "-mx=5" | Out-null
