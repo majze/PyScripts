@@ -81,6 +81,15 @@ Needs updating. Not native OS friendly.
  
 
 
+
+
+## CompressionTest.ps1
+Suprise! It's a PowerShell script. This script runs through four different compression methods using 7-zip, to get a better idea of which is best for your specific needs. If space is your only issue, Ultra compression is probably best. If waiting for the heat death of the universe is an issue, perhaps losing a few megabits is worth the time saved. Use this if you need to know what's best for your specific server environment and the types/number of files you are compressing.
+
+Change the paths at the top of the script to match your environment. The current setup will create various zip files from within a specific directory of your choosing, log the time it took for each operation, and after a set amount of runs, finish the log file with an average for each compression level. So far it tests using mx5, mx7, mx9, and LZMA - but you can always add more switches. Learn more about [7z switches here](https://sevenzip.osdn.jp/chm/cmdline/switches/method.htm).
+
+While LZMA is better with more available memory and cores, it actually takes much longer on production environments with shared resources - one more reason to test compression levels using the actual environment instead of your personal workstation.
+
 [moveUp1]: https://i.imgur.com/42CyxuF.png "moveUp Parent folder"
 [moveUp2]: https://i.imgur.com/Q2cF3NF.png "moveUp Child folder"
 [moveUp3]: https://i.imgur.com/aU9QT5e.png "moveUp Parent Final State"
