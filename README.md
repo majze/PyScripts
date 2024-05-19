@@ -19,9 +19,14 @@ py .\clearSubdirectoriesContents.py
 Runinng without any arguments will run the script LOCALLY, and will prompt the user twice: Once to confirm the script's run location, and again to confirm the subdirectories to be cleared. It does not matter what the files or folders are named, as long as they do not include nonstandard characters.<br>
 
 Start this script in the top level directory, either by using the '--path' argument or placing the script file there. <br> <br>
-Optional arguments: <br>
-&nbsp;&nbsp;--path *full_path* <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *full_path* with FULL path to top level directory of ~/someDir <br>
+### Optional arguments: <br>
+```
+py .\clearSubdirectoriesContents.py --path full_path
+```
+&nbsp;&nbsp;**full_path** *(String)* <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Replace **full_path** with the full path to top level directory of ~/someDir <br>
+&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/bad_selfies
+
 &nbsp;&nbsp;--ignore *ignore_list*<br>
 &nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *ignore_list* with comma separated values. Include quotes if using spaces. <br>
 &nbsp;&nbsp;--verbose <br>
