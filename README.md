@@ -20,15 +20,20 @@ Runinng without any arguments will run the script LOCALLY, and will prompt the u
 
 Start this script in the top level directory, either by using the '--path' argument or placing the script file there. <br>
 ### Optional arguments: <br>
-&nbsp;&nbsp;**full_path** *(String)* <br>
+&nbsp;&nbsp;--path **full_path** *(String)* <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Replace **full_path** with the full path to top level directory of ~/someDirectory <br>
 &nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/bad_selfies
 ```
 py .\clearSubdirectoriesContents.py --path full_path
 ```
 
-&nbsp;&nbsp;--ignore *ignore_list*<br>
-&nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *ignore_list* with comma separated values. Include quotes if using spaces. <br>
+&nbsp;&nbsp;--ignore **ignore_list** *(String)*<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Replace **ignore_list** with comma separated values. Include quotes if using spaces. <br>
+&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* backups,saves,secrets
+```
+py .\clearSubdirectoriesContents.py --ignore ignore_list
+```
+
 &nbsp;&nbsp;--verbose <br>
 &nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Logs every I/O operation to the terminal. No additional input required <br>
 &nbsp;&nbsp;--rm <br>
