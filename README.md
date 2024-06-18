@@ -69,10 +69,20 @@ For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , a
 It does not matter what the files or folders are named, as long as they do not include nonstandard characters.
 
 ### Run Instructions
-Start this script in the top level directory, either by using the '--path' argument or placing the script file there. <br> <br>
-Optional arguments: <br>
-&nbsp;&nbsp;--path *full_path* <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**String** - Replace *full_path* with FULL path to top level directory of ~/someDir <br>
+Navigate to the script location in your favorite terminal and type:
+```
+py .\moveFilesUpOneLevel.py
+```
+Start this script in the top level directory, and it will run LOCALLY. Or use the '--path' argument to specify another location. <br> <br>
+
+### Optional arguments: <br>
+&nbsp;&nbsp;--path **full_path** *(String)* <br>
+```
+py .\moveFilesUpOneLevel.py --path full_path
+```
+&nbsp;&nbsp;&nbsp;&nbsp;Replace **full_path** with the full path to top level directory of ~/someDirectory <br>
+&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/Pictures/Vacations
+
 &nbsp;&nbsp;--verbose <br>
 &nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Logs every read/write operation to the terminal. No additional input required <br>
 &nbsp;&nbsp;--rm <br>
@@ -80,9 +90,6 @@ Optional arguments: <br>
 See function argv_init() for more information on arguments
 
 Examples:<br>
-```
-py .\moveFilesUpOneLevel.py
-```
 ```
 py .\moveFilesUpOneLevel.py --path 'C:\Users\admin\Documents\someDir' 
 ```
