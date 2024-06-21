@@ -37,13 +37,13 @@ py .\clearSubdirectoriesContents.py --ignore ignore_list
 
 
 &nbsp;&nbsp;--verbose <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required. <br> <br>
 
 &nbsp;&nbsp;--rm <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Removes empty subdirectories after deleting their files, unless specified by the --ignore argument.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Removes empty subdirectories after deleting their files, unless specified by the --ignore argument. <br> <br>
 
 &nbsp;&nbsp;--force <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Runs script with no user input, assuming the best intentions. Careful! <br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Runs script with no user input, assuming the best intentions. Careful! <br> <br>
 
 ### Examples:
 ```
@@ -55,7 +55,8 @@ py .\clearSubdirectoriesContents.py --path /home/username/Documents --ignore 'pl
 
 **Q:** Why delete empty directories *after* removing their content? Why not delete the directories right away? <br>
 **A:** This script was made with exceptions in mind, so some files and folders can be left untouched. There's not really a point to running this script with --rm and without --ignore. Just delete the directories manually in that case.
-
+<br> <br>
+ 
 ## moveFilesUpOneLevel.py
 This script moves all contents of subdirectories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
 For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , and all of the contents of the sub directories brought up to ~/someDir/ <br>
@@ -81,15 +82,14 @@ Start this script in the top level directory, and it will run LOCALLY. Or use th
 py .\moveFilesUpOneLevel.py --path full_path
 ```
 &nbsp;&nbsp;&nbsp;&nbsp;Replace **full_path** with the full path to top level directory of ~/someDirectory <br>
-&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/Pictures/Vacations
-
+&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/Pictures/Vacations <br> <br>
 
 &nbsp;&nbsp;--verbose <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required. <br> <br>
 
 &nbsp;&nbsp;--rm <br>
 &nbsp;&nbsp;&nbsp;&nbsp;Removes empty subdirectories after moving files up. No additional input required. <br> <br>
-See function argv_init() for more information on arguments
+See function argv_init() for more information on arguments <br> <br>
 
 ### Examples:<br>
 ```
@@ -100,7 +100,7 @@ py .\moveFilesUpOneLevel.py --path 'C:\Users\admin\Documents\someDir' --verboose
 ```
 
 ## fileSizer.py
-Needs updating. Not native OS friendly.
+Needs updating. Not native OS friendly. <br> <br>
  
 
 
