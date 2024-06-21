@@ -37,13 +37,13 @@ py .\clearSubdirectoriesContents.py --ignore ignore_list
 
 
 &nbsp;&nbsp;--verbose <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Logs every I/O operation to the terminal. No additional input required <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required <br>
 
 &nbsp;&nbsp;--rm <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Removes empty subdirectories after deleting their files, unless specified by the --ignore argument.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Removes empty subdirectories after deleting their files, unless specified by the --ignore argument.<br>
 
 &nbsp;&nbsp;--force <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Runs script with no user input, assuming the best intentions. Careful! <br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Runs script with no user input, assuming the best intentions. Careful! <br><br>
 
 ### Examples:
 ```
@@ -83,13 +83,15 @@ py .\moveFilesUpOneLevel.py --path full_path
 &nbsp;&nbsp;&nbsp;&nbsp;Replace **full_path** with the full path to top level directory of ~/someDirectory <br>
 &nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/Pictures/Vacations
 
+
 &nbsp;&nbsp;--verbose <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Logs every read/write operation to the terminal. No additional input required <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required <br>
+
 &nbsp;&nbsp;--rm <br>
-&nbsp;&nbsp;&nbsp;&nbsp;**Boolean** - Removes empty subdirectories after moving files up. No additional input required <br> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Removes empty subdirectories after moving files up. No additional input required. <br> <br>
 See function argv_init() for more information on arguments
 
-Examples:<br>
+### Examples:<br>
 ```
 py .\moveFilesUpOneLevel.py --path 'C:\Users\admin\Documents\someDir' 
 ```
