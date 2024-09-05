@@ -4,7 +4,7 @@ import os
 import sys
 
 # GLOBAL VARIABLES
-filePath = r"\\a\b\c\Data.txt"
+filePath = r"\\a\b\c\data.txt"
 recordCounts = {}
 relationships = {}
 comboLine = ""
