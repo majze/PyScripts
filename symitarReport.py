@@ -4,7 +4,7 @@ import os
 import sys
 
 # GLOBAL VARIABLES
-filePath = r"\\fs4\Redirection\dspreder\Documents\test\SymitarCodes\sym586MortData.txt"
+filePath = r"\\a\b\c\test\SymitarCodes\Data.txt"
 recordCounts = {}
 relationships = {}
 comboLine = ""
