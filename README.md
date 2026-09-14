@@ -6,59 +6,36 @@ Why do something more than three times when you can write a script to do it for 
 <br>
 ###### _[Randall Munroe is a beautiful human](https://xkcd.com/)_
 
-## clearSubdirectoriesContents.py
-For the specified directory, the script goes into each child subdirectory and delete the contents.<br>
+## dir_purge.py
+Deletes all files within all child sub-directories existing in a top-level directory.
 
-For example, every folder in ~/parentDir/ will be parsed and have its content deleted, unless specified using the ignoreList passed into the argument '--ignore'. All the files and folders inside each subdirectory ~/parentDir/folder1 , ... , ~/parentDir/folderN etc will be removed unless an exception is made.<br>
+For a given parent directory, the script traverses each immediate sub-directory and deletes its contents. Exclusions can be specified via the `--ignore` argument.
 
 ### Run Instructions
-Navigate to the script location in your favorite terminal and type:
-```
-py .\clearSubdirectoriesContents.py
-```
-Runinng without any arguments will run the script LOCALLY, and will prompt the user twice: Once to confirm the script's run location, and again to confirm the subdirectories to be cleared. It does not matter what the files or folders are named, as long as they do not include nonstandard characters.<br>
+Execute the script from the terminal. If no `--path` is provided, it defaults to the directory where the script resides. The script prompts for path confirmation and deletion confirmation unless forced.
 
-Start this script in the top level directory, either by using the '--path' argument or placing the script file there. <br>
-### Optional arguments: <br>
-&nbsp;&nbsp;--path **full_path** *(String)* <br>
-```
-py .\clearSubdirectoriesContents.py --path full_path
-```
-&nbsp;&nbsp;&nbsp;&nbsp;Replace **full_path** with the full path to top level directory of ~/someDirectory <br>
-&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* /home/MyUsername/bad_selfies
-
-
-&nbsp;&nbsp;--ignore **ignore_list** *(String)*<br>
-```
-py .\clearSubdirectoriesContents.py --ignore ignore_list
-```
-&nbsp;&nbsp;&nbsp;&nbsp;Replace **ignore_list** with comma separated values. Include quotes if using spaces. <br>
-&nbsp;&nbsp;&nbsp;&nbsp;*e.g.* backups,saves,secrets
-
-
-&nbsp;&nbsp;--verbose <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Logs every I/O operation to the terminal. No additional input required. <br> <br>
-
-&nbsp;&nbsp;--rm <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Removes empty subdirectories after deleting their files, unless specified by the --ignore argument. <br> <br>
-
-&nbsp;&nbsp;--force <br>
-&nbsp;&nbsp;&nbsp;&nbsp;Runs script with no user input, assuming the best intentions. Careful! <br> <br>
-
-### Examples:
-```
-py .\clearSubdirectoriesContents.py --ignore .git,node_modules,src --verbose
-```
-```
-py .\clearSubdirectoriesContents.py --path /home/username/Documents --ignore 'plex, My Games' --rm --force
+```bash
+./dir_purge.py
 ```
 
-**Q:** Why delete empty directories *after* removing their content? Why not delete the directories right away? <br>
-**A:** This script was made with exceptions in mind, so some files and folders can be left untouched. There's not really a point to running this script with --rm and without --ignore. Just delete the directories manually in that case.
-<br> <br>
+### Arguments
+*   `--path <full_path>`: Target top-level directory.
+*   `--ignore <ignore_list>`: Comma-separated list of file or folder names to exclude. Use quotes for names containing spaces.
+*   `--verbose`: Outputs all I/O actions to the terminal.
+*   `--rmtree`: Removes origin directories entirely after clearing contents.
+*   `--force`: Bypasses all user confirmation prompts.
+
+### Examples
+```bash
+./dir_purge.py --ignore .git,node_modules,src --verbose
+./dir_purge.py --path /home/username/Documents --ignore "plex, My Games" --rmtree --force
+```
+
+### Performance Note: The Fast Purge Update
+When the script executes with `--rmtree` and without any `--ignore` constraints, it triggers a "fast purge." Instead of parsing through a directory file-by-file in Python to unlink them individually, it passes the directory directly to the OS via `shutil.rmtree`. This eliminates iteration overhead and significantly improves performance on drives with high file counts. The standard item-by-item deletion method is only utilized when exclusions must be respected.
  
 ## moveFilesUpOneLevel.py
-This script moves all contents of subdirectories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
+This script moves all contents of sub-directories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
 For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , and all of the contents of the sub directories brought up to ~/someDir/ <br>
 
 
