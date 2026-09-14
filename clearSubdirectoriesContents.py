@@ -1,164 +1,181 @@
-""" Author: MajZe (D. Spreder) | Language: Python 3.7.4 | Last Edited: Jan 23, 2020
-# For the specified directory, go into each child subdirectory and delete the contents.
-# Start this script in the top level directory.
-# Input args can accept ignore list of files/folders to keep
-# Optional arguments:
-    --path full_path
-        String - Replace 'full_path' with FULL path to top level directory of ~/someDir
-    --ignore string_list
-        List - Replace 'string_list' with comma separated values. Include quotes if using spaces.
-    --verbose
-        Boolean - Logs every I/O operation to the terminal
-    --rm
-        Boolean - Removes empty subdirectories after deleting their files
-    --force
-        Boolean - Runs script with no user input, assuming the best intentions. Careful!
+#!/usr/bin/env python3
+"""
+Description: Deletes all files within all child subdirectories existing in a top-level directory.
 """
 
 import argparse
-import os
 import shutil
 import sys
+from pathlib import Path
+from typing import List, Set
 
 
-def main():
-    # argument parser
-    parser = argparse.ArgumentParser(description='Optional flags that the control script')
-    argv_init(parser)
-    args = parser.parse_args()
-    
-    # Original/starting directory
-    if args.path:
-        origin = args.path
+# ( •_•)>⌐■-■ Initialization ----------
+
+def parse_arguments() -> argparse.Namespace:
+    """Parses command line arguments."""
+    parser = argparse.ArgumentParser(description="Clears subdirectory contents with optional constraints.")
+    parser.add_argument('--path', type=str, help="Full path to the target top-level directory.")
+    parser.add_argument('--ignore', type=str, help="Comma-separated file/folder names to ignore.")
+    parser.add_argument('--rm', action='store_true', help="Removes empty directories after clearing contents.")
+    parser.add_argument('--verbose', action='store_true', help="Outputs every I/O action to the terminal.")
+    parser.add_argument('--force', action='store_true', help="Bypasses all user confirmation prompts.")
+    return parser.parse_args()
+
+
+# (⌐■_■) Validation & Helper Methods ----------
+
+def get_ignore_set(ignore_arg: str) -> Set[str]:
+    """Converts a comma-separated string into a set of ignored names."""
+    if not ignore_arg:
+        return set()
+    return {item.strip() for item in ignore_arg.split(',')}
+
+
+def resolve_target_directory(path_arg: str) -> Path:
+    """Resolves the target path and validates its existence and type."""
+    if path_arg:
+        target_path = Path(path_arg).resolve()
     else:
-        origin = os.path.dirname(os.path.realpath(__file__))
-        print("\nNo path specified - Default execution path: ", origin)
-        # Confirm no path argument if using script file locally
-        if args.force:
-            print("Forced Path confirmed\n")
-        else:
-            askConfirm = input("Confirm (y/n): ").casefold()
-            if askConfirm == "y":
-                print("Path confirmed\n")
-            elif askConfirm == "n":
-                print("** Job cancelled by user **\n")
-                sys.exit()
-            else:
-                print("Interpreting vague answer as no, stopping script!\n")
-                raise Exception("Unexpected user input confirming execution path\n")
-    
-    # Get ignore list & all subdirectories in origin directory
-    if args.ignore:
-        ignoreList = getIgnoreList(args)
-        print(f"Ignoring files and folders with names: {ignoreList}") 
-        dirList = [dir for dir in os.listdir(origin) if os.path.isdir(j(origin, dir)) and dir not in ignoreList]
-    else:
-        dirList = [dir for dir in os.listdir(origin) if os.path.isdir(j(origin, dir))]
-    
-    # Safety check before DELETING FILES
-    if not args.force:
-        verify(dirList, args)
-    
-    # Parse through subdirectories as main loop
-    for dir in dirList:
-        # Navigate through subdirectory
-        cwd = os.path.join(origin, dir)
-        if args.verbose:
-            print(f"* Parsing {dir}")
-        
-        # Gather list of files and folders
-        files = [f for f in os.listdir(cwd) if not os.path.isdir(os.path.join(cwd,f))]
-        folders = [f for f in os.listdir(cwd) if os.path.isdir(os.path.join(cwd,f))]
-        
-        # IgnoreList
-        if args.ignore:
-            files = [f for f in files if f not in ignoreList]
-            folders = [f for f in folders if f not in ignoreList]
-        
-        # Delete all files in subdirectory. Add exceptions here
-        for f in files:
-            os.remove(j(cwd,f))
-            if args.verbose:
-                print(f"** Removed {f}")
-        
-        # Delete all folders in subdirectory. Add exceptions here
-        if args.rm:
-            for folder in folders:
-                shutil.rmtree(j(cwd,folder))
-                if args.verbose:
-                    print(f"** Removed {folder}")
-        
-        # Log the directory after having been cleared
-        if args.verbose:
-            print("* Passed " + dir)
-    
-    # Remove empty directories
-    if args.rm:
-        removeEmpties(args, origin, dirList)
-        print("Removed empty directories")
-    
-    print("\n** Operation complete **\n")
+        target_path = Path(__file__).parent.resolve()
+
+    if not target_path.exists():
+        print(f"Error: Path does not exist: {target_path}")
+        sys.exit(1)
+    if not target_path.is_dir():
+        print(f"Error: Path is not a directory: {target_path}")
+        sys.exit(1)
+
+    return target_path
 
 
-def removeEmpties(args, origin, dirList):
-    """Removes empty directories"""
-    for dir in dirList:
-        cwd = j(origin, dir)
-        if len(os.listdir(cwd)) == 0:
-            os.rmdir(cwd)
-            if args.verbose:
-                print(f"* Removed empty {dir}")
+def confirm_execution_path(target_path: Path, force: bool) -> None:
+    """Validates the execution path with the user unless forced."""
+    print(f"\nTarget execution path: {target_path}")
+    if force:
+        print("Force flag detected. Proceeding.")
+        return
 
-
-def verify(dirList, args):
-    """Asks user for input before clearing subdirectories"""
-    # Check if list is empty
-    if len(dirList) == 0:
-        print("There are no directories to clear, exiting...")
-        raise Exception("dirList is empty")
-    
-    # Confirm deletion of files
-    print('=*='*2, " ABOUT TO CLEAR THE FOLLOWING ", '=*='*4)
-    for dir in dirList:
-        print(">\t" + dir)
-    
-    if args.ignore:
-        print('=*='*2, " WITH EXCEPTIONS: ", f"{getIgnoreList(args)}")
-    print('=*='*2, " CONFIRM Y/N: ", end='')
-    answer = input().casefold()
-    
+    answer = input("Confirm path (y/n): ").casefold().strip()
     if answer == "y":
-        print("Input confirmed")
+        print("Path confirmed.")
     elif answer == "n":
-        print("Good call. Exiting")
-        sys.exit()
+        print("Operation aborted by user. Exiting.")
+        sys.exit(0)
     else:
-        print("Interpreting vague answer as no, exiting")
-        raise Exception("** Job cancelled by user **")
+        print("Invalid input. Terminating process.")
+        sys.exit(1)
 
 
-def j(path1, path2):
-    """Shorthand function for os.path.join()"""
-    return os.path.join(path1, path2)
+def get_target_subdirectories(origin: Path, ignore_set: Set[str]) -> List[Path]:
+    """Retrieves all immediate subdirectories within the origin path, omitting ignored items."""
+    return [d for d in origin.iterdir() if d.is_dir() and d.name not in ignore_set]
 
 
-def getIgnoreList(args):
-    """Splits the ignore list by delimiter ',' and returns a list"""
-    ignoreList = args.ignore.replace(', ', ',').split(',')
-    return ignoreList
+def confirm_deletion(dir_list: List[Path], ignore_set: Set[str], force: bool) -> None:
+    """Prompts the user to confirm the list of directories to be cleared."""
+    if not dir_list:
+        print("No valid subdirectories found to clear. Exiting.")
+        sys.exit(0)
+
+    if force:
+        return
+
+    print("\nTARGET DIRECTORIES FOR CLEARING:")
+    for directory in dir_list:
+        print(f" > {directory.name}")
+
+    if ignore_set:
+        print(f"\nACTIVE EXCLUSIONS: {ignore_set}")
+
+    answer = input("\nConfirm deletion (y/n): ").casefold().strip()
+    if answer == "y":
+        print("Deletion confirmed.")
+    elif answer == "n":
+        print("Operation aborted by user. Exiting.")
+        sys.exit(0)
+    else:
+        print("Invalid input. Terminating process.")
+        sys.exit(1)
 
 
-def argv_init(parser):
-    parser.add_argument('--path',
-                        help='Full path to excute script in')
-    parser.add_argument('--ignore',
-                        help='File extention(s) to ignore')
-    parser.add_argument('--rm', action='store_true',
-                        help='Removes empty directories after moving files')
-    parser.add_argument('--verbose', action='store_true',
-                        help='Outputs every I/O action to the terminal')
-    parser.add_argument('--force', action='store_true',
-                        help='Runs script with no user input')
+def safe_delete_file(file_path: Path, verbose: bool) -> None:
+    """Attempts to unlink a file, catching and logging permission or access errors."""
+    try:
+        file_path.unlink()
+        if verbose:
+            print(f"** Removed file: {file_path.name}")
+    except OSError as e:
+        print(f"Failed to remove file {file_path.name}: {e}")
+
+
+def safe_delete_directory(dir_path: Path, verbose: bool) -> None:
+    """Attempts to remove a directory tree, catching and logging access errors."""
+    try:
+        shutil.rmtree(dir_path)
+        if verbose:
+            print(f"** Removed directory: {dir_path.name}")
+    except OSError as e:
+        print(f"Failed to remove directory {dir_path.name}: {e}")
+
+
+def remove_empty_directory(dir_path: Path, verbose: bool) -> None:
+    """Removes a single directory if it is empty."""
+    try:
+        if not any(dir_path.iterdir()):
+            dir_path.rmdir()
+            if verbose:
+                print(f"* Removed empty origin directory: {dir_path.name}")
+    except OSError as e:
+        print(f"Failed to check or remove empty directory {dir_path.name}: {e}")
+
+
+# ¯\_(ツ)_/¯ Action Logic Functions ----------
+
+def clear_subdirectory_contents(subdirs: List[Path], ignore_set: Set[str], verbose: bool, remove_dirs: bool) -> None:
+    """Iterates through specified subdirectories and clears their contents."""
+    for subdir in subdirs:
+        if verbose:
+            print(f"\n* Parsing {subdir.name}")
+
+        for item in subdir.iterdir():
+            if item.name in ignore_set:
+                continue
+
+            if item.is_file() or item.is_symlink():
+                safe_delete_file(item, verbose)
+            elif item.is_dir() and remove_dirs:
+                safe_delete_directory(item, verbose)
+
+        if verbose:
+            print(f"* Passed {subdir.name}")
+
+
+def cleanup_empty_origins(subdirs: List[Path], verbose: bool) -> None:
+    """Iterates through the original subdirectories and removes them if they are completely empty."""
+    for subdir in subdirs:
+        if subdir.exists() and subdir.is_dir():
+            remove_empty_directory(subdir, verbose)
+
+
+def main() -> None:
+    """Primary execution flow."""
+    args = parse_arguments()
+    ignore_set = get_ignore_set(args.ignore)
+
+    target_path = resolve_target_directory(args.path)
+    confirm_execution_path(target_path, args.force)
+
+    subdirs = get_target_subdirectories(target_path, ignore_set)
+    confirm_deletion(subdirs, ignore_set, args.force)
+
+    clear_subdirectory_contents(subdirs, ignore_set, args.verbose, args.rm)
+
+    if args.rm:
+        cleanup_empty_origins(subdirs, args.verbose)
+        print("Empty directory cleanup complete.")
+
+    print("\n** Operation complete **\n")
 
 
 if __name__ == "__main__":
