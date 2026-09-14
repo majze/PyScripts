@@ -17,7 +17,7 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Clears subdirectory contents with optional constraints.")
     parser.add_argument('--path', type=str, help="Full path to the target top-level directory.")
     parser.add_argument('--ignore', type=str, help="Comma-separated file/folder names to ignore.")
-    parser.add_argument('--rm', action='store_true', help="Removes empty directories after clearing contents.")
+    parser.add_argument('--rmtree', action='store_true', help="Removes origin directories after clearing contents.")
     parser.add_argument('--verbose', action='store_true', help="Outputs every I/O action to the terminal.")
     parser.add_argument('--force', action='store_true', help="Bypasses all user confirmation prompts.")
     return parser.parse_args()
@@ -132,8 +132,14 @@ def remove_empty_directory(dir_path: Path, verbose: bool) -> None:
 
 # ¯\_(ツ)_/¯ Action Logic Functions ----------
 
-def clear_subdirectory_contents(subdirs: List[Path], ignore_set: Set[str], verbose: bool, remove_dirs: bool) -> None:
-    """Iterates through specified subdirectories and clears their contents."""
+def execute_fast_tree_purge(subdirs: List[Path], verbose: bool) -> None:
+    """Executes a direct rmtree operation on target directories, bypassing file iteration."""
+    for subdir in subdirs:
+        safe_delete_directory(subdir, verbose)
+
+
+def execute_selective_purge(subdirs: List[Path], ignore_set: Set[str], verbose: bool, rmtree: bool) -> None:
+    """Iterates through specified subdirectories to clear contents while respecting exclusions."""
     for subdir in subdirs:
         if verbose:
             print(f"\n* Parsing {subdir.name}")
@@ -144,7 +150,7 @@ def clear_subdirectory_contents(subdirs: List[Path], ignore_set: Set[str], verbo
 
             if item.is_file() or item.is_symlink():
                 safe_delete_file(item, verbose)
-            elif item.is_dir() and remove_dirs:
+            elif item.is_dir() and rmtree:
                 safe_delete_directory(item, verbose)
 
         if verbose:
@@ -169,11 +175,15 @@ def main() -> None:
     subdirs = get_target_subdirectories(target_path, ignore_set)
     confirm_deletion(subdirs, ignore_set, args.force)
 
-    clear_subdirectory_contents(subdirs, ignore_set, args.verbose, args.rm)
+    if args.rmtree and not ignore_set:
+        print("\nFast tree purge initiated.")
+        execute_fast_tree_purge(subdirs, args.verbose)
+    else:
+        execute_selective_purge(subdirs, ignore_set, args.verbose, args.rmtree)
 
-    if args.rm:
-        cleanup_empty_origins(subdirs, args.verbose)
-        print("Empty directory cleanup complete.")
+        if args.rmtree:
+            cleanup_empty_origins(subdirs, args.verbose)
+            print("Empty directory cleanup complete.")
 
     print("\n** Operation complete **\n")
 
