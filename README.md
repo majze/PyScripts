@@ -65,7 +65,7 @@ python3 linux_backup.py
 ```
 
 ### Performance Note: Dynamic Thread Allocation & Scaling
-This script leverages a dynamic resource allocator rather than a static backup loop. When dispatching tasks, it pulls up to two directories from the queue and calculates their size ratio. Available CPU threads are then proportionally divided between the two concurrent `7z` subprocesses—ensuring a massive `Videos` folder gets the majority of processing power while a smaller `Documents` folder efficiently finishes on a single thread. 
+This script leverages a dynamic resource allocator rather than a static backup loop. When dispatching tasks, it pulls up to two directories from the queue and calculates their size ratio. Available CPU threads are then proportionally divided between the two concurrent `7z` subprocesses, ensuring a massive `Videos` folder gets the majority of processing power while a smaller `Documents` folder efficiently finishes on a single thread, for example.
 
 Additionally, the script scales the `7z` compression ratio inversely to directory size. Directories over 20GB default to a lighter compression (Level 1) to prevent extreme processing bottlenecks, while smaller directories receive tighter compression (Level 3).
 
