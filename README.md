@@ -33,7 +33,42 @@ Execute the script from the terminal. If no `--path` is provided, it defaults to
 
 ### Performance Note: The Fast Purge Update
 When the script executes with `--rmtree` and without any `--ignore` constraints, it triggers a "fast purge." Instead of parsing through a directory file-by-file in Python to unlink them individually, it passes the directory directly to the OS via `shutil.rmtree`. This eliminates iteration overhead and significantly improves performance on drives with high file counts. The standard item-by-item deletion method is only utilized when exclusions must be respected.
- 
+
+## linux_backup.py
+Backs up primary user directories into compressed `.7z` archives using dynamically allocated CPU threads.
+
+The script scans standard Linux user directories (`Documents`, `Downloads`, `Music`, `Pictures`, `Videos`), verifies available disk space, and safely copies them to a timestamped folder within `~/Downloads`. To maximize hardware efficiency, it utilizes `asyncio` to process folders concurrently while distributing available system threads based on directory weight.
+
+### Run Instructions
+Execute the script from the terminal. The script will automatically scan the target directories, calculate aggregate sizes, and output a processing queue. It will then prompt you to confirm or override the maximum number of CPU threads it is allowed to use before beginning the archive process.
+
+```bash
+python3 linux_backup.py
+```
+
+### Requirements
+Unlike traditional scripts, this program relies on interactive terminal prompts rather than command-line arguments. However, it enforces strict system requirements upon initialization:
+*   **Operating System**: Must be a POSIX-compliant system (Linux/macOS).
+*   **Privileges**: Must be executed as a standard user. The script will fatally exit if run as `root` to preserve intended file permissions.
+*   **Dependencies**: The `7z` executable must be installed and available in your system's PATH.
+
+### Examples
+```bash
+# Standard execution
+python3 linux_backup.py
+
+# Expected prompt behavior:
+# Confirm execution with 15 threads.
+#  - Press [ENTER] to retain default (15)
+#  - Input an integer to override (Maximum: 15)
+#  - Input any other character to abort
+```
+
+### Performance Note: Dynamic Thread Allocation & Scaling
+This script leverages a dynamic resource allocator rather than a static backup loop. When dispatching tasks, it pulls up to two directories from the queue and calculates their size ratio. Available CPU threads are then proportionally divided between the two concurrent `7z` subprocesses—ensuring a massive `Videos` folder gets the majority of processing power while a smaller `Documents` folder efficiently finishes on a single thread. 
+
+Additionally, the script scales the `7z` compression ratio inversely to directory size. Directories over 20GB default to a lighter compression (Level 1) to prevent extreme processing bottlenecks, while smaller directories receive tighter compression (Level 3).
+
 ## moveFilesUpOneLevel.py
 This script moves all contents of sub-directories up to their parent directory. This script is nonrecursive, but can be modified to handle additional levels of directories. Be careful when moving all files and folders up if there are any files that share the same name. <br> <br>
 For example, ~/someDir/folder1 , ~/someDir/folder2 , ... , ~/someDir/folderN , and all of the contents of the sub directories brought up to ~/someDir/ <br>
