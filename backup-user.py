@@ -7,22 +7,42 @@ from pathlib import Path
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-# ( •_•)>⌐■-■ Initialization ----------
-
 BASE_DIR = Path.home()
 FAVORITE_DIRS = ["Documents", "Downloads", "Music", "Pictures", "Videos"]
 TZ = ZoneInfo("America/New_York")
 GB_IN_BYTES = 1024**3
 
-# (⌐■_■) Validation & Helper Methods ----------
+def enforce_standard_privileges():
+    """Validates execution privileges to prevent system-level modifications."""
+    if os.name == 'posix' and hasattr(os, 'geteuid'):
+        if os.geteuid() == 0:
+            sys.exit("[FATAL] Do not run as root.")
+    elif os.name == 'nt':
+        import ctypes
+        try:
+            if ctypes.windll.shell32.IsUserAnAdmin():
+                sys.exit("[FATAL] Do not run as administrator.")
+        except Exception:
+            sys.exit("[FATAL] Privilege validation failed.")
 
-def enforce_system_requirements():
-    """Validates execution privileges and external binary dependencies."""
-    if os.name == 'posix' and hasattr(os, 'geteuid') and os.geteuid() == 0:
-        sys.exit("[FATAL] Do not run as root.")
+def locate_7z_binary() -> str:
+    """Searches environment PATH and default OS directories for the 7z executable."""
+    known_locations = [
+        "7z",
+        "7z.exe",
+        r"C:\Program Files\7-Zip\7z.exe",
+        r"C:\Program Files (x86)\7-Zip\7z.exe",
+        "/usr/bin/7z",
+        "/usr/local/bin/7z",
+        "/opt/homebrew/bin/7z"
+    ]
 
-    if not shutil.which("7z"):
-        sys.exit("[FATAL] '7z' executable not found in PATH.")
+    for path in known_locations:
+        resolved_path = shutil.which(path)
+        if resolved_path:
+            return resolved_path
+
+    sys.exit("[FATAL] 7z binary not found.")
 
 def enforce_disk_capacity(target_dir: Path, raw_size_bytes: int):
     """Verifies destination partition has adequate space for the expected payload."""
@@ -30,7 +50,11 @@ def enforce_disk_capacity(target_dir: Path, raw_size_bytes: int):
     while not parent_dir.exists():
         parent_dir = parent_dir.parent
 
-    free_bytes = shutil.disk_usage(parent_dir).free
+    try:
+        free_bytes = shutil.disk_usage(parent_dir).free
+    except OSError:
+        sys.exit("[FATAL] Disk usage validation failed.")
+
     estimated_required = raw_size_bytes * 0.4
 
     if free_bytes < estimated_required:
@@ -89,18 +113,17 @@ def calculate_thread_split(size_a: int, size_b: int, total_threads: int) -> tupl
     t_b = total_threads - t_a
     return t_a, t_b
 
-def generate_active_tasks_string(active_info: dict) -> str:
+def format_active_tasks(active_info: dict) -> str:
     """Formats the active processing dictionary into a CLI output string."""
     if not active_info:
         return "None"
     return ", ".join([f"{name}({threads}t)" for name, threads in active_info.items()])
 
-# ¯\_(ツ)_/¯ Action Logic Functions ----------
-
 class BackupManager:
     """Orchestrates directory discovery, thread allocation, and asynchronous archive generation."""
 
     def __init__(self):
+        self.binary_path = locate_7z_binary()
         self.today_str = datetime.now(TZ).strftime("%Y-%m-%d")
         self.dest_dir = BASE_DIR / "Downloads" / self.today_str
         self.sys_threads = os.cpu_count() or 4
@@ -126,7 +149,7 @@ class BackupManager:
 
         dir_info.sort(key=lambda x: x[1], reverse=True)
 
-        print("\n--- Processing Queue ---")
+        print("\n- Processing Queue -")
         print(f"{'Directory':<15} | {'Size':<10} | {'Comp. Level'}")
         print("-" * 45)
 
@@ -148,7 +171,10 @@ class BackupManager:
             f"> "
         )
 
-        confirm = input(prompt_msg).strip()
+        try:
+            confirm = input(prompt_msg).strip()
+        except EOFError:
+            sys.exit("[FATAL] Input stream closed.")
 
         if confirm == "":
             pass
@@ -160,7 +186,7 @@ class BackupManager:
             else:
                 self.allocated_threads = max(1, requested_threads)
         else:
-            sys.exit("Operation aborted by user.")
+            sys.exit("User aborted execution.")
 
         self.local_remaining_threads = self.allocated_threads
         print(f"[INFO] Active thread limit established at: {self.allocated_threads}\n")
@@ -170,7 +196,7 @@ class BackupManager:
         enforce_disk_capacity(self.dest_dir, self.total_size)
         try:
             self.dest_dir.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
+        except OSError as e:
             sys.exit(f"[FATAL] Destination creation failed: {e}")
 
     async def _archive_worker(self, dir_name: str, size: int, comp_level: int, threads: int) -> tuple:
@@ -181,7 +207,7 @@ class BackupManager:
         if not source_path.exists() or not source_path.is_dir():
             return dir_name, threads, f"[WARNING] Target bypass. Source unavailable: {source_path}"
 
-        cmd_args = ["7z", "a", "-t7z", f"-mx={comp_level}", f"-mmt={threads}"]
+        cmd_args = [self.binary_path, "a", "-t7z", f"-mx={comp_level}", f"-mmt={threads}"]
 
         if dir_name == "Downloads":
             cmd_args.append(f"-x!{self.today_str}")
@@ -201,11 +227,13 @@ class BackupManager:
             if process.returncode == 0:
                 return dir_name, threads, f"[SUCCESS] '{dir_name}' completed. (Lvl: {comp_level}, Thds: {threads})"
 
-            err_msg = stderr.decode().strip() if stderr else "Unknown error."
+            err_msg = stderr.decode().strip() if stderr else "Unknown."
             return dir_name, threads, f"[ERROR] Execution failed for '{dir_name}'. Log: {err_msg}"
 
-        except Exception as e:
-            return dir_name, threads, f"[ERROR] Subprocess exception on '{dir_name}': {str(e)}"
+        except OSError as e:
+            return dir_name, threads, f"[ERROR] Subprocess execution failed on '{dir_name}': {str(e)}"
+        except Exception:
+            return dir_name, threads, f"[ERROR] Subprocess exception on '{dir_name}': Unknown."
 
     def _dispatch_task(self, name: str, size: int, comp: int, threads: int):
         """Wraps the worker execution into a tracked asyncio task."""
@@ -223,7 +251,7 @@ class BackupManager:
             while True:
                 elapsed = int(time.time() - start_time)
                 mins, secs = divmod(elapsed, 60)
-                active_str = generate_active_tasks_string(self.active_task_info)
+                active_str = format_active_tasks(self.active_task_info)
 
                 output = f"\r[WORKING {spinner_chars[idx % 4]}] Time: {mins}m {secs}s | Active: [{active_str}]"
                 sys.stdout.write(output.ljust(80))
@@ -235,62 +263,72 @@ class BackupManager:
             sys.stdout.write("\r".ljust(80) + "\r")
             sys.stdout.flush()
 
+    def _has_sufficient_threads_for_split(self) -> bool:
+        """Evaluates thread availability for concurrent task division."""
+        return self.allocated_threads >= 2
+
+    def _dispatch_initial_tasks(self):
+        """Extracts and launches the initial queue segments."""
+        if not self.queue:
+            return
+
+        d1_name, d1_size, d1_comp = self.queue.pop(0)
+
+        if self.queue and self._has_sufficient_threads_for_split():
+            d2_name, d2_size, d2_comp = self.queue.pop(0)
+            t1, t2 = calculate_thread_split(d1_size, d2_size, self.allocated_threads)
+            self._dispatch_task(d1_name, d1_size, d1_comp, t1)
+            self._dispatch_task(d2_name, d2_size, d2_comp, t2)
+            self.local_remaining_threads -= (t1 + t2)
+        else:
+            self._dispatch_task(d1_name, d1_size, d1_comp, self.allocated_threads)
+            self.local_remaining_threads -= self.allocated_threads
+
+    async def _process_pending_tasks(self):
+        """Iterates through pending completion events and dispatches queued tasks."""
+        done, self.pending_tasks = await asyncio.wait(self.pending_tasks, return_when=asyncio.FIRST_COMPLETED)
+
+        for task in done:
+            dir_name, freed_threads, result_msg = task.result()
+            self.completed_results.append(result_msg)
+            self.local_remaining_threads += freed_threads
+            if dir_name in self.active_task_info:
+                del self.active_task_info[dir_name]
+
+        while self.local_remaining_threads > 0 and self.queue:
+            pull_count = min(2, len(self.queue), self.local_remaining_threads)
+
+            if pull_count >= 2:
+                d_a, sz_a, comp_a = self.queue.pop(0)
+                d_b, sz_b, comp_b = self.queue.pop(0)
+                t_a, t_b = calculate_thread_split(sz_a, sz_b, self.local_remaining_threads)
+                self._dispatch_task(d_a, sz_a, comp_a, t_a)
+                self._dispatch_task(d_b, sz_b, comp_b, t_b)
+                self.local_remaining_threads -= (t_a + t_b)
+            elif pull_count == 1:
+                d_a, sz_a, comp_a = self.queue.pop(0)
+                t_a = self.local_remaining_threads
+                self._dispatch_task(d_a, sz_a, comp_a, t_a)
+                self.local_remaining_threads -= t_a
+
     async def execute_queue(self):
         """Main asynchronous event loop controlling task dispatch and thread recovery."""
         print("[INFO] Initiating dynamic thread distribution...")
         monitor_task = asyncio.create_task(self._progress_monitor())
 
-        # Phase 1: Launch the initial tasks with safety check for single-thread scenarios
-        if self.queue:
-            d1_name, d1_size, d1_comp = self.queue.pop(0)
+        self._dispatch_initial_tasks()
 
-            if self.queue and self.allocated_threads >= 2:
-                d2_name, d2_size, d2_comp = self.queue.pop(0)
-                t1, t2 = calculate_thread_split(d1_size, d2_size, self.allocated_threads)
-                self._dispatch_task(d1_name, d1_size, d1_comp, t1)
-                self._dispatch_task(d2_name, d2_size, d2_comp, t2)
-                self.local_remaining_threads -= (t1 + t2)
-            else:
-                self._dispatch_task(d1_name, d1_size, d1_comp, self.allocated_threads)
-                self.local_remaining_threads -= self.allocated_threads
-
-        # Phase 2: Recursive event loop
         while self.pending_tasks:
-            done, self.pending_tasks = await asyncio.wait(self.pending_tasks, return_when=asyncio.FIRST_COMPLETED)
-
-            for task in done:
-                dir_name, freed_threads, result_msg = task.result()
-                self.completed_results.append(result_msg)
-                self.local_remaining_threads += freed_threads
-                if dir_name in self.active_task_info:
-                    del self.active_task_info[dir_name]
-
-            while self.local_remaining_threads > 0 and self.queue:
-                pull_count = min(2, len(self.queue), self.local_remaining_threads)
-
-                if pull_count >= 2:
-                    d_a, sz_a, comp_a = self.queue.pop(0)
-                    d_b, sz_b, comp_b = self.queue.pop(0)
-                    t_a, t_b = calculate_thread_split(sz_a, sz_b, self.local_remaining_threads)
-                    self._dispatch_task(d_a, sz_a, comp_a, t_a)
-                    self._dispatch_task(d_b, sz_b, comp_b, t_b)
-                    self.local_remaining_threads -= (t_a + t_b)
-                elif pull_count == 1:
-                    d_a, sz_a, comp_a = self.queue.pop(0)
-                    t_a = self.local_remaining_threads
-                    self._dispatch_task(d_a, sz_a, comp_a, t_a)
-                    self.local_remaining_threads -= t_a
+            await self._process_pending_tasks()
 
         monitor_task.cancel()
 
-        print("\n--- Execution Results ---")
+        print("\n- Execution Results -")
         for result in self.completed_results:
             print(result)
 
-# (づ￣ ³￣)づ Core Execution ----------
-
 async def main():
-    enforce_system_requirements()
+    enforce_standard_privileges()
 
     manager = BackupManager()
     manager.scan_target_directories()
@@ -300,10 +338,11 @@ async def main():
     await manager.execute_queue()
 
 if __name__ == "__main__":
-    if os.name == 'posix':
-        try:
-            asyncio.run(main())
-        except KeyboardInterrupt:
-            sys.exit("\nExecution interrupted by user.")
-    else:
-        sys.exit("[FATAL] Operating system not supported. Posix required.")
+    try:
+        if sys.platform == 'win32':
+            asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        sys.exit("\nExecution interrupted.")
+    except Exception as e:
+            sys.exit(f"\n[FATAL] System failure: {str(e)}")
